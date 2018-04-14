@@ -30,14 +30,20 @@ def getPage(request, text):
     if request.method == "GET":
         try:
             object = Pages.objects.get(name = text)
-            return HttpResponse(object.page)
+            return HttpResponse(message + object.page)
         except Pages.DoesNotExist:
             return HttpResponse(message + "No hay una página para " + text)
     else:
         if request.user.is_authenticated():
-            page = Pages(name = text, page = request.body.decode("utf-8"))
-            page.save()
-            return HttpResponse(message + "Nueva página creada")
+            try:
+                object = Pages.objects.get(name = text)
+                object.page = request.body.decode("utf-8")
+                object.save()
+                return HttpResponse(message + "Página actualizada")
+            except Pages.DoesNotExist:
+                page = Pages(name = text, page = request.body.decode("utf-8"))
+                page.save()
+                return HttpResponse(message + "Nueva página creada")
         else:
             return HttpResponse(message + "Para crear una página primero debes loguearte.")
 
